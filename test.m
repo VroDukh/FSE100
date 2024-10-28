@@ -1,6 +1,6 @@
 brick = ConnectBrick('GROUP4');
 brick.SetColorMode(1, 2);
-brick.GyroCalibrate(3);
+%brick.GyroCalibrate(3);
 %while 1
 %    angle = brick.GyroAngle(2);
 %    distance = brick.UltrasonicDist(3);
@@ -19,29 +19,44 @@ brick.GyroCalibrate(3);
 
 global key;
 InitKeyboard();
+brick.playTone(100, 300, 150);
 while 1
     pause(0.1);
     switch key
-    case 'uparrow'
+    case 'w'
         disp('Up Arrow Pressed!');
         brick.MoveMotor('B',-95);
-        brick.MoveMotor('D',-100);
-    case 'downarrow'
+        brick.MoveMotor('D',-95);
+    case 's'
         disp('Down Arrow Pressed!');
         brick.MoveMotor('B',95);
-        brick.MoveMotor('D',100);
-    case 'rightarrow'
+        brick.MoveMotor('D',95);
+    case 'd'
         disp('Right Arrow Pressed!');
         brick.MoveMotor('B',-100);
         brick.MoveMotor('D',100);
-    case 'leftarrow'
+    case 'a'
         disp('Left Arrow Pressed!');
         brick.MoveMotor('B',100);
         brick.MoveMotor('D',-100);
+    case 'k'
+        %brick.MoveMotor('A',10);
+        disp('K Pressed!');
+        %pause(0.05);
+        %brick.StopMotor('A','Break')
+        brick.MoveMotorAngleRel('A', 15, 20, 'Coast');
+        brick.WaitForMotor('A');
+    case 'm'
+        %brick.MoveMotor('A',-10);
+        disp('M Pressed!');
+        %pause(0.05);
+        %brick.StopMotor('A','Break')
+        brick.MoveMotorAngleRel('A', -15, 20, 'Coast');
+        brick.WaitForMotor('A');
     case 0
         disp('No Key Pressed!');
-        brick.StopMotor('BD','Brake');
-    case 'q'
+        brick.StopMotor('BD','Coast');
+    case 'x'
         break;
     end
 end

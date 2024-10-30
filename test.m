@@ -25,20 +25,20 @@ while 1
     switch key
     case 'w'
         disp('Up Arrow Pressed!');
-        brick.MoveMotor('B',-95);
-        brick.MoveMotor('D',-95);
-    case 's'
-        disp('Down Arrow Pressed!');
         brick.MoveMotor('B',95);
         brick.MoveMotor('D',95);
+    case 's'
+        disp('Down Arrow Pressed!');
+        brick.MoveMotor('B',-95);
+        brick.MoveMotor('D',-95);
     case 'd'
         disp('Right Arrow Pressed!');
-        brick.MoveMotor('B',-100);
-        brick.MoveMotor('D',100);
+        brick.MoveMotor('B',-95);
+        brick.MoveMotor('D',95);
     case 'a'
         disp('Left Arrow Pressed!');
-        brick.MoveMotor('B',100);
-        brick.MoveMotor('D',-100);
+        brick.MoveMotor('B',95);
+        brick.MoveMotor('D',-95);
     case 'k'
         %brick.MoveMotor('A',10);
         disp('K Pressed!');

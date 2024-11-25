@@ -13,13 +13,13 @@ while true
     colorCode = brick.ColorCode(1);  % Color sensor is at Port 1
     if colorCode == 4
         % Yellow: Starting point
-        brick.MoveMotor(leftMotor, 100);
-        brick.MoveMotor(rightMotor, 100);
+        %brick.MoveMotor(leftMotor, 100);
+        %brick.MoveMotor(rightMotor, 100);
     elseif colorCode == 3
         % Green: Goal reached
-        brick.StopMotor(leftMotor);
-        brick.StopMotor(rightMotor);
-        disp('Goal reached!');
+        %brick.StopMotor(leftMotor);
+        %brick.StopMotor(rightMotor);
+        %disp('Goal reached!');
         %break;
     end
 
@@ -42,9 +42,9 @@ while true
             pause(0.1);
             brick.StopMotor('B','Brake');
             brick.StopMotor('D','Brake');
-            brick.MoveMotorAngleRel(leftMotor, -100, turnAngle, 'Brake');
-            brick.WaitForMotor(leftMotor);
+            brick.MoveMotorAngleRel(leftMotor, -100, turnAngle, 'Brake');            
             brick.MoveMotorAngleRel(rightMotor, 100, turnAngle, 'Brake');
+            brick.WaitForMotor(leftMotor);
             brick.WaitForMotor(rightMotor);
         else
             % Turn right
@@ -53,9 +53,9 @@ while true
             pause(0.1);
             brick.StopMotor('B','Brake');
             brick.StopMotor('D','Brake');
-            brick.MoveMotorAngleRel(leftMotor, 100, turnAngle, 'Brake');
-            brick.WaitForMotor(leftMotor);
+            brick.MoveMotorAngleRel(leftMotor, 100, turnAngle, 'Brake');            
             brick.MoveMotorAngleRel(rightMotor, -100, turnAngle, 'Brake');
+            brick.WaitForMotor(leftMotor);
             brick.WaitForMotor(rightMotor);
             
 

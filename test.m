@@ -1,106 +1,78 @@
 % Connect to the EV3 brick
-brick = ConnectBrick('GROUP4');
+%brick = ConnectBrick('GROUP4');
 brick.SetColorMode(1, 2);  % Set the color sensor in color mode
 rightMotor = 'B';  % Right motor
 leftMotor = 'D';   % Left motor
-wallThreshold = 35;  % Distance threshold to detect walls (in cm)
-turnAngle = 720;  % Motor angle for a 90-degree turn
-maxSensorValue = 255;  % Sensors max value for unreliable readings
+turnAngle = 340;  % Motor angle for a 90-degree turn
+%backUpDistance = -180;  % Backward motion to avoid a wall
+wallThreshold = 30;  % Distance threshold to detect walls (in cm)
+%maxSensorValue = 255;  % Sensors max value for unreliable readings
 
-% Main loop to navigate the maze
 while true
-    % Check the color detected by the color sensor on Port 1
+    % Check the current color
     colorCode = brick.ColorCode(1);  % Color sensor is at Port 1
-    
     if colorCode == 4
-        % YELLOW detected - Starting point, continue moving
-        brick.MoveMotor(leftMotor, 50);
-        brick.MoveMotor(rightMotor, 50);
-        
+        % Yellow: Starting point
+        brick.MoveMotor(leftMotor, 100);
+        brick.MoveMotor(rightMotor, 100);
     elseif colorCode == 3
-        % GREEN detected - Goal reached
+        % Green: Goal reached
         brick.StopMotor(leftMotor);
         brick.StopMotor(rightMotor);
         disp('Goal reached!');
         %break;
     end
-    
-    % Step 1: Check for wall in front
-    distanceFront = brick.UltrasonicDist(4);  % Ultrasonic sensor is at Port 4
 
-    % Handle unreliable sensor readings
-    if distanceFront == maxSensorValue
-        distanceFront = Inf;  % Treat as no wall detected
-    end
-
-    if distanceFront > wallThreshold
-        % If no wall in front, move forward
-        brick.MoveMotor(leftMotor, 50);
-        brick.MoveMotor(rightMotor, 50);
-        continue;  % Skip side checks and keep moving forward
-    end
-
-    % If wall detected in front, stop motors
-    brick.StopMotor(leftMotor);
-    brick.StopMotor(rightMotor);
-
-    % Step 2: Check for wall on the left side
-    brick.MoveMotorAngleRel(leftMotor, -50, turnAngle, 'Brake');
-    brick.MoveMotorAngleRel(rightMotor, 50, turnAngle, 'Brake');
-    brick.WaitForMotor(leftMotor);
-    distanceLeft = brick.UltrasonicDist(4);  % Ultrasonic sensor is at Port 4
-
-    % Handle unreliable sensor readings
-    if distanceLeft == maxSensorValue
-        distanceLeft = Inf;  % Treat as no wall detected
-    end
-    
-    % Turn back to face forward
-    brick.MoveMotorAngleRel(leftMotor, 50, turnAngle, 'Brake');
-    brick.MoveMotorAngleRel(rightMotor, -50, turnAngle, 'Brake');
-    brick.WaitForMotor(leftMotor);
-
-    % Step 3: Check for wall on the right side
-    brick.MoveMotorAngleRel(leftMotor, 50, turnAngle, 'Brake');
-    brick.MoveMotorAngleRel(rightMotor, -50, turnAngle, 'Brake');
-    brick.WaitForMotor(leftMotor);
-    distanceRight = brick.UltrasonicDist(4);  % Ultrasonic sensor is at Port 4
-
-    % Handle unreliable sensor readings
-    if distanceRight == maxSensorValue
-        distanceRight = Inf;  % Treat as no wall detected
-    end
-
-    % Turn back to face forward
-    brick.MoveMotorAngleRel(leftMotor, -50, turnAngle, 'Brake');
-    brick.MoveMotorAngleRel(rightMotor, 50, turnAngle, 'Brake');
-    brick.WaitForMotor(leftMotor);
-
-    % Step 4: Decide movement based on distances
-    if distanceLeft > wallThreshold
-        % No wall on the left, turn left
-        brick.MoveMotorAngleRel(leftMotor, -50, turnAngle, 'Brake');
-        brick.MoveMotorAngleRel(rightMotor, 50, turnAngle, 'Brake');
-        brick.WaitForMotor(leftMotor);
+    % Check for front wall using the touch sensor
+    if brick.TouchPressed(3)  % Touch sensor is at Port 3
+        % Wall detected in front
+        brick.StopMotor('B','Brake');
+        brick.StopMotor('D','Brake');
         
-    elseif distanceRight > wallThreshold
-        % No wall on the right, turn right
-        brick.MoveMotorAngleRel(leftMotor, 50, turnAngle, 'Brake');
-        brick.MoveMotorAngleRel(rightMotor, -50, turnAngle, 'Brake');
-        brick.WaitForMotor(leftMotor);
-        
+        % Check distance on the left
+        leftDistance = brick.UltrasonicDist(4);  % Ultrasonic sensor on left (Port 4)
+        %if leftDistance == maxSensorValue
+        %    leftDistance = Inf;  % Treat max value as no wall
+        %end
+
+        if leftDistance > wallThreshold
+            % Turn left if no wall on the left
+            brick.MoveMotor(leftMotor, -100);
+            brick.MoveMotor(rightMotor, -100);
+            pause(0.1);
+            brick.StopMotor('B','Brake');
+            brick.StopMotor('D','Brake');
+            brick.MoveMotorAngleRel(leftMotor, -100, turnAngle, 'Brake');
+            brick.WaitForMotor(leftMotor);
+            brick.MoveMotorAngleRel(rightMotor, 100, turnAngle, 'Brake');
+            brick.WaitForMotor(rightMotor);
+        else
+            % Turn right
+            brick.MoveMotor(leftMotor, -100);
+            brick.MoveMotor(rightMotor, -100);
+            pause(0.1);
+            brick.StopMotor('B','Brake');
+            brick.StopMotor('D','Brake');
+            brick.MoveMotorAngleRel(leftMotor, 100, turnAngle, 'Brake');
+            brick.WaitForMotor(leftMotor);
+            brick.MoveMotorAngleRel(rightMotor, -100, turnAngle, 'Brake');
+            brick.WaitForMotor(rightMotor);
+            
+
+            % Check front wall again using touch sensor
+            %if brick.TouchPressed(3)
+                % Wall detected on the right, back up again
+            %    brick.MoveMotorAngleRel(leftMotor, -70, backUpDistance, 'Brake');
+            %    brick.MoveMotorAngleRel(rightMotor, -70, backUpDistance, 'Brake');
+            %    brick.WaitForMotor(leftMotor);
+            %end
+        end
     else
-        % Dead end (walls on left, front, and right), turn around
-        brick.MoveMotorAngleRel(leftMotor, 50, 2 * turnAngle, 'Brake');  % Turn 180 degrees
-        brick.MoveMotorAngleRel(rightMotor, -50, 2 * turnAngle, 'Brake');
-        brick.WaitForMotor(leftMotor);
+        % Move forward if no front wall
+        brick.MoveMotor(leftMotor, 100);
+        brick.MoveMotor(rightMotor, 100);
     end
-
-    % Move forward briefly after making a turn
-    brick.MoveMotor(leftMotor, 50);
-    brick.MoveMotor(rightMotor, 50);
-    pause(0.5);  % Adjust this to control how far it moves after turning
 end
 
-% Disconnect from the EV3 brick after the maze is solved
+% Disconnect from the EV3 brick after solving the maze
 DisconnectBrick(brick);

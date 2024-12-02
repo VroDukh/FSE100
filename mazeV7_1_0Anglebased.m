@@ -3,8 +3,7 @@ brick = ConnectBrick('GROUP4');
 brick.SetColorMode(2, 2);  % Set the color sensor in color mode
 rightMotor = 'D';  % Right motor
 leftMotor = 'B';   % Left motor
-wallThreshold = 30;  % Distance threshold to detect walls (in cm)
-forwardDuration = 0.3;  % Time (in s) to move forward after detecting no wall
+wallThreshold = 30;  % Distance threshold to detect walls (in cm)\
 commitmentTime = 1.5;   % Time (in s) to commit to moving forward after turning
 checkpointDelay = 0.5; % Time to move forward after reaching Green
 committed = false;    % Boolean to make the robot commit to a turn

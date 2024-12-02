@@ -1,96 +1,93 @@
 % Connect to the EV3 brick
-%brick = ConnectBrick('GROUP4');
-brick.SetColorMode(1, 2);  % Set the color sensor in color mode
-rightMotor = 'B';  % Right motor
-leftMotor = 'D';   % Left motor
-turnAngle = 340;  % Motor angle for a 90-degree turn
+brick = ConnectBrick('GROUP4');
+brick.SetColorMode(2, 2);  % Set the color sensor in color mode
+rightMotor = 'D';  % Right motor
+leftMotor = 'B';   % Left motor
 wallThreshold = 30;  % Distance threshold to detect walls (in cm)
-forwardDuration = 1;  % Time (in seconds) to move forward after detecting no wall
-commitmentTime = 2;   % Time (in seconds) to commit to moving forward after turning
-checkpointDelay = 0.5; % Time to move forward after reaching Green so that the car is fully inside the green zone
-committed = false;    % Boolean used to make the robot commit to a turn and/or ignore the IR sensor values during a turn
+forwardDuration = 0.3;  % Time (in s) to move forward after detecting no wall
+commitmentTime = 1.5;   % Time (in s) to commit to moving forward after turning
+checkpointDelay = 0.5; % Time to move forward after reaching Green
+committed = false;    % Boolean to make the robot commit to a turn
 commitStartTime = 0;  % Timestamp for when commitment started
 
+%brick.ResetUltrasonicSensor(3);
+
+
+global key;
+InitKeyboard();
+
 while true
+    pause(0.1); % Pause for system stability
+
     % Check the current color
     colorCode = brick.ColorCode(1); 
+
     if colorCode == 5  % Red color
-        brick.StopMotor('B', 'Brake');
-        brick.StopMotor('D', 'Brake');
-
+        brick.StopMotor('BD', 'Brake');
         pause(2);  % Stop for 2 seconds
-
         brick.MoveMotor(leftMotor, 100);
         brick.MoveMotor(rightMotor, 100);
 
-    elseif colorCode == 3  % Green color 
-        %brick.MoveMotor(leftMotor, 100);
-        %brick.MoveMotor(rightMotor, 100);
-
-        %pause(checkpointDelay);  % Move forward for a short time
-
-        %brick.StopMotor('B', 'Brake');
-        %brick.StopMotor('D', 'Brake');
+    elseif colorCode == 3  % Green color
         disp('Goal reached!');
+        %pause(checkpointDelay);  % Move forward for a short time
+        %brick.StopMotor('BD', 'Brake');
         %break;
     end
 
     % Check left distance
-    leftDistance = brick.UltrasonicDist(4); 
+    leftDistance = brick.UltrasonicDist(3); 
 
     % Check front wall
-    if brick.TouchPressed(3) || (~committed && leftDistance > wallThreshold)
+    if ~committed && (brick.TouchPressed(1) || leftDistance > wallThreshold)
         % Wall in front OR no wall on left
-
-        brick.StopMotor('B', 'Brake');
-        brick.StopMotor('D', 'Brake');
+        brick.StopMotor('BD', 'Brake');
         
-        if ~committed && leftDistance > wallThreshold
+        if leftDistance > wallThreshold
             % Turn left if no wall on the left
 
-            brick.MoveMotor(leftMotor, 100);
-            brick.MoveMotor(rightMotor, 100);
-            pause(forwardDuration);  % Move forward for a bit so that car turns into center of the opening on left
-
-            brick.StopMotor('B', 'Brake');
-            brick.StopMotor('D', 'Brake');
-
-            brick.MoveMotorAngleRel(leftMotor, -100, turnAngle, 'Brake');            
-            brick.MoveMotorAngleRel(rightMotor, 100, turnAngle, 'Brake');
-
-            brick.WaitForMotor(leftMotor);
-            brick.WaitForMotor(rightMotor);
-            
-            % Enter committed state
-            committed = true;
-            commitStartTime = tic;  % Start the timer for commitment
-
-        else
-            % Turn right if wall on the left or committed
             brick.MoveMotor(leftMotor, -100);
             brick.MoveMotor(rightMotor, -100);
-
             pause(0.1);
-            
-            brick.StopMotor('B', 'Brake');
-            brick.StopMotor('D', 'Brake');
-            
-            brick.MoveMotorAngleRel(leftMotor, 100, turnAngle, 'Brake');            
-            brick.MoveMotorAngleRel(rightMotor, -100, turnAngle, 'Brake');
-            
+            brick.StopMotor('BD','Brake');
+
+            disp('Turning left...');
+            brick.MoveMotorAngleRel(leftMotor, -90, 260, 'Brake'); 
             brick.WaitForMotor(leftMotor);
-            brick.WaitForMotor(rightMotor);
+            brick.MoveMotorAngleRel(rightMotor,90, 260, 'Brake');
+        else
+            % Turn right if wall on the left
+
+            brick.MoveMotor(leftMotor, -100);
+            brick.MoveMotor(rightMotor, -100);
+            pause(0.1);
+            brick.StopMotor('BD','Brake');
+
+            disp('Turning right...');
+            brick.MoveMotorAngleRel(leftMotor, 90, 260, 'Brake'); 
+            brick.WaitForMotor(leftMotor);
+            brick.MoveMotorAngleRel(rightMotor, -90, 260, 'Brake');
         end
-    else
+
+        % Enter committed state
+        committed = true;
+        commitStartTime = tic;  % Start the timer for commitment
+        % Commited state just makes sure that after making the turn,
+        % the robot actually goes forward into the turn and doesnt detect the area it came from as another possible turn
+
+
+    elseif ~committed
         % Move forward if no front wall
         brick.MoveMotor(leftMotor, 100);
         brick.MoveMotor(rightMotor, 100);
     end
-    
-    % Exit committed state after the commitment duration
+
+    % Exit committed state after the commitment time has elapsed 
     if committed && toc(commitStartTime) >= commitmentTime
         committed = false;
     end
+    % Ensures the robot doesnt remain in commited state and ignore turns
+    
 end
 
 % Disconnect from the EV3 brick after solving the maze

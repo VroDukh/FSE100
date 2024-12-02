@@ -3,8 +3,7 @@
 brick.SetColorMode(2, 2);  % Set the color sensor in color mode
 rightMotor = 'B';  % Right motor
 leftMotor = 'D';   % Left motor
-wallThreshold = 30;  % Distance threshold to detect walls (in cm)
-forwardDuration = 0.3;  % Time (in s) to move forward after detecting no wall
+wallThreshold = 30;  % Distance threshold to detect walls (in cm)\
 commitmentTime = 2;   % Time (in s) to commit to moving forward after turning, prevents robot from continously tunring
 checkpointDelay = 0.5; % Time to move forward after reaching Green so that the robot is fully inside the green zone
 turnDuration = 0.5;   % Time (in s) the robot will take to make a 90 degree turn

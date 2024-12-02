@@ -28,10 +28,11 @@ while true
         brick.MoveMotor(leftMotor, 100);
         brick.MoveMotor(rightMotor, 100);
 
-    elseif colorCode == 3  % Green color
+    elseif colorCode == 2 || colorCode == 3 || colorCode == 4  % Green,Blue or Yellow detected
         disp('Goal reached!');
-        %pause(checkpointDelay);  % Move forward for a short time
-        %brick.StopMotor('BD', 'Brake');
+        %pause(checkpointDelay);
+        %brick.StopMotor('BD', 'Coast');
+        %run("remoteControl.m");
         %break;
     end
 

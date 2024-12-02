@@ -1,22 +1,25 @@
 % Connect to the EV3 brick
 %brick = ConnectBrick('GROUP4');
-brick.SetColorMode(1, 2);  % Set the color sensor in color mode
+brick.SetColorMode(2, 2);  % Set the color sensor in color mode
 rightMotor = 'B';  % Right motor
 leftMotor = 'D';   % Left motor
 wallThreshold = 30;  % Distance threshold to detect walls (in cm)
-forwardDuration = 1;  % Time (in s) to move forward after detecting no wall
-commitmentTime = 2;   % Time (in s) to commit to moving forward after turning
+forwardDuration = 0.3;  % Time (in s) to move forward after detecting no wall
+commitmentTime = 2;   % Time (in s) to commit to moving forward after turning, prevents robot from continously tunring
 checkpointDelay = 0.5; % Time to move forward after reaching Green so that the robot is fully inside the green zone
-turnDuration = 1.5;   % Time (in s) the robot will turn left
+turnDuration = 0.5;   % Time (in s) the robot will take to make a 90 degree turn
 committed = false;    % Boolean used to make the robot commit to a turn and/or ignore the IR sensor values during a turn
 commitStartTime = 0;  % Timestamp for when commitment started
 
+global key;
+InitKeyboard();
+
 while true
+    pause(0.1); %Pause for system stability
     % Check the current color
     colorCode = brick.ColorCode(1); 
     if colorCode == 5  % Red color
-        brick.StopMotor('B', 'Brake');
-        brick.StopMotor('D', 'Brake');
+        brick.StopMotor('BD', 'Brake');
 
         pause(2);  % Stop for 2 seconds
 
@@ -26,39 +29,36 @@ while true
     elseif colorCode == 3  % Green color
         disp('Goal reached!');
         %pause(checkpointDelay);  % Move forward for a short time
-        %brick.StopMotor('B', 'Brake');
-        %brick.StopMotor('D', 'Brake');
+        %brick.StopMotor('BD', 'Brake');
         %break;
     end
 
     % Check left distance
-    leftDistance = brick.UltrasonicDist(4); 
+    leftDistance = brick.UltrasonicDist(3); 
 
     % Check front wall
-    if brick.TouchPressed(3) || (~committed && leftDistance > wallThreshold)
+    if brick.TouchPressed(1) || (~committed && leftDistance > wallThreshold)
         % Wall in front OR no wall on left
 
-        brick.StopMotor('B', 'Brake');
-        brick.StopMotor('D', 'Brake');
+        brick.StopMotor('BD', 'Brake');
         
         if ~committed && leftDistance > wallThreshold
-            % Turn left if no wall on the left
+            % Turn left if no wall on the left & the robot is currently not going through a turn already(committed)
 
             brick.MoveMotor(leftMotor, 100);
             brick.MoveMotor(rightMotor, 100);
-            pause(forwardDuration);  % Move forward for a bit so that car turns into center of the opening on left
 
-            brick.StopMotor('B', 'Brake');
-            brick.StopMotor('D', 'Brake');
+            %%pause(forwardDuration);  % Move forward for a bit so that car turns into center of the opening on left
+
+            brick.StopMotor('BD', 'Brake');
 
             % Turn left for the specified turnDuration
-            brick.MoveMotor(leftMotor, -100);
-            brick.MoveMotor(rightMotor, 100);
+            brick.MoveMotor(leftMotor,-100);
+            brick.MoveMotor(rightMotor,100);
 
             pause(turnDuration);  % Keep turning left 
 
-            brick.StopMotor('B', 'Brake');
-            brick.StopMotor('D', 'Brake');
+            brick.StopMotor('BD', 'Brake');
             
             % Enter committed state
             committed = true;
@@ -66,11 +66,10 @@ while true
 
         else
             % Turn right if wall on the left or committed
-            brick.MoveMotor(leftMotor, -100);
-            brick.MoveMotor(rightMotor, 100);
+            brick.MoveMotor(leftMotor,100);
+            brick.MoveMotor(rightMotor,-100);
             pause(turnDuration);  % Turn right for the specified duration
-            brick.StopMotor('B', 'Brake');
-            brick.StopMotor('D', 'Brake');
+            brick.StopMotor('BD', 'Brake');
         end
     else
         % Move forward if no front wall
@@ -78,7 +77,7 @@ while true
         brick.MoveMotor(rightMotor, 100);
     end
     
-    % Exit committed state after the commitment duration
+    % Exit committed state after a couple of seconds
     if committed && toc(commitStartTime) >= commitmentTime
         committed = false;
     end

@@ -1,4 +1,4 @@
-# FSE100 ( FinalSubmission.m )
+# FSE100 ( thefinalcode.m )
 
 Team Members:
 
@@ -11,4 +11,4 @@ Junbo You
 Aurelio Pulido
 
 
-The Current Latest Code File is ( FinalSubmission.m )
+The Current Latest Code File is ( thefinalcode.m )

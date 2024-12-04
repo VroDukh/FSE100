@@ -5,12 +5,12 @@ brick.SetColorMode(2, 3); % Set color sensor on Port 2 to ColorCode mode
 % Constants
 RIGHT_WALL_DIST = 70; % cm (distance for right turn)
 DELAY_RED_STOP = 1.75; % seconds
-TURN_DURATION = 2.4; % seconds for 90° turn (adjust experimentally)
+TURN_DURATION = 2.45; % seconds for 90° turn (adjust experimentally)
 BACKUP_DURATION = 1; % seconds to back up
 SEARCH_COLORS = [2, 3, 4]; % Blue -> Green -> Yellow
 KEYBOARD_STOP_KEY = 'q'; % Key to restart maze-solving
-RIGHT_MOTOR_SPEED = 58; % Speed for right motor (%)
-LEFT_MOTOR_SPEED = 57; % Speed for left motor (%)
+RIGHT_MOTOR_SPEED = 56; % Speed for right motor (%)
+LEFT_MOTOR_SPEED = 58; % Speed for left motor (%)
 TURN_SPEED = 25; % Speed for turning (%)
 FORWARD_AFTER_TURN_DURATION = 1.3; % Adjustable duration for moving forward after a turn (in seconds)
 distance = 0;   
